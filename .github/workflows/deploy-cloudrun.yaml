@@ -41,5 +41,5 @@ jobs:
         with:
           image: gcr.io/woolies-344703/bestapiever:latest
           service: bestapiever
-          env_vars: 'APIKEY="${{ secrets.APIKEY }}"'
+          env_vars: "APIKEY=${{ secrets.APIKEY }}"
           region: australia-southeast1
