@@ -8,9 +8,26 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: main
+
+      - name: Setup GCloud
+        uses: google-github-actions/setup-gcloud@v0.2.1
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT }}
+
+      - name: Configure docker for GCP
+        run: gcloud auth configure-docker
+
       - name: Push Latest Docker Image to Google Container Registry
         id: gcr
-        run: ./docker-to-gcr.sh
+        run: |
+          docker pull dfranciswoolies/ciarecruitment-bestapiever:247904
+          docker tag dfranciswoolies/ciarecruitment-bestapiever:247904 gcr.io/woolies-344703/bestapiever:latest
+          docker push gcr.io/woolies-344703/bestapiever:latest
 
       - name: Authenticate to Google Cloud
         id: auth
@@ -25,3 +42,4 @@ jobs:
           image: gcr.io/woolies-344703/bestapiever:latest
           service: bestapiever
           env_vars: 'APIKEY="${{ secrets.APIKEY }}"'
+          region: australia-southeast1
