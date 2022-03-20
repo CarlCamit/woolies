@@ -1,0 +1,27 @@
+on:
+  push:
+    branches:
+      - main
+
+name: Deploy Container
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Push Latest Docker Image to Google Container Registry
+        id: gcr
+        run: ./docker-to-gcr.sh
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: "${{ secrets.GCP_SA_KEY }}"
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v0
+        with:
+          image: gcr.io/woolies-344703/bestapiever:latest
+          service: bestapiever
+          env_vars: 'APIKEY="${{ secrets.APIKEY }}"'
